@@ -6,6 +6,7 @@ from models import info
 from models import orders
 from django import forms
 from datetime import date
+from django.shortcuts import redirect
 # Create your views here.
 
 class registerform(forms.ModelForm):
@@ -52,7 +53,7 @@ def submit(request):
         lname = request.POST['lname']
         gender = request.POST['gender']
         if gender == 'M':
-        	gender = True
+            gender = True
         else:
             gender = False
         rand = id_generator()
@@ -68,23 +69,44 @@ def submit(request):
 
 def register(request):
     return render(request,'firstform.html')
-
+def login(request):
+    cookie_value = request.COOKIES.get('id')
+    if cookie_value!= None :
+        randkey = cookie_to_rand(cookie_value)
+        if info.objects.filter(rand=randkey).exists():
+            a=info.objects.get(rand=randkey)
+            return HttpResponse("hey " + a.fname)
+        else:
+            cookie_value = rand_to_cookie(id_generator())
+            return redirect("http://127.0.0.1:8000")
+    else:
+        return redirect("http://127.0.0.1:8000")
+        
 def placeorder(request):
     cookie_value = request.COOKIES.get('id')
     randkey = cookie_to_rand(cookie_value)
     if info.objects.filter(rand=randkey).exists():
         a=info.objects.get(rand=randkey)
+        ordervalues = []
+        ordervalues.append(request.POST.get('type1'))
+        ordervalues.append(request.POST.get('type2'))
+        ordervalues.append(request.POST.get('type3'))
+        ordervalues.append(request.POST.get('type4'))
+        ordervalues.append(request.POST.get('type5'))
         orders=[]
-        orders.append(request.POST['one'])
-        orders.append(request.POST['two'])
-        orders.append(request.POST['three'])
-        orders.append(request.POST['four'])
-        orders.append(request.POST['five'])
-        address = request.POST['address']
+        orders.append(request.POST.get('one'))
+        orders.append(request.POST.get('two'))
+        orders.append(request.POST.get('three'))
+        orders.append(request.POST.get('four'))
+        orders.append(request.POST.get('five'))
+        address = request.POST.get('address')
         quantity=' '
-        for i in range(0,5):
-            if orders[i] != '0':
-                quantity = quantity+str(i+1)+'x'+orders[i]+' + '
+        count = 0
+        for i in ordervalues:
+            if orders[count]:
+                quantity = quantity+i+'x'+orders[count]+' + '
+                count = count + 1
+        quantity = quantity[0:(len(quantity) - 3)]
         a.TotalOrders += 1
         a.save()
         orderid = a.fname+str(a.TotalOrders)

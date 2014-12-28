@@ -12,4 +12,5 @@ urlpatterns = patterns('',
     url(r'^submit',views.submit),
     url(r'^order',views.placeorder),
     url(r'^placeorder',views.placeorder),
+    url(r'^login',views.login),
 )
