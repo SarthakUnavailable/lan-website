@@ -1,0 +1,27 @@
+<html>
+	<head>
+		<title>
+
+		</title>
+	</head>
+ <body>
+ Welcome {{ name }}
+  <form action="/placeorder/" method="POST">
+	{% csrf_token %}
+  	1 metre: <input type="number" name="one" value="0"><br>
+  	2 metre: <input type="number" name="two" value="0"><br>
+    3 metre: <input type="number" name="three" value="0"><br>
+    4 metre: <input type="number" name="four" value="0"><br>
+    5 metre: <input type="number" name="five" value="0"><br>
+    Adress: <textarea name="address" cols="50" rows="5">
+	{{ address }}
+    </textarea>
+	<br/>
+    <input type="submit" value="Submit">
+  </form> 
+ </body>
+</html>
+
+
+
+
