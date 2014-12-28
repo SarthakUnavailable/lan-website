@@ -17,8 +17,8 @@ class info(models.Model):
 
 
 class orders(models.Model):
-  orderid = models.CharField(max_length=10, default='0')
   custph = models.ForeignKey(info)
   metersquantity = models.CharField(max_length=50, default='0')
   status = models.CharField(max_length=3)
-  DatePlaced = models.DateTimeField()
+  DatePlaced = models.DateField()
+  deliveryaddress = models.CharField(max_length=50, default='0')

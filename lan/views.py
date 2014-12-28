@@ -6,7 +6,9 @@ from models import info
 from models import orders
 from django import forms
 from datetime import date
+from django.core.mail import send_mail
 from django.shortcuts import redirect
+
 # Create your views here.
 
 class registerform(forms.ModelForm):
@@ -52,36 +54,49 @@ def submit(request):
         fname = request.POST['fname']
         lname = request.POST['lname']
         gender = request.POST['gender']
-        if gender == 'M':
+        if gender == 'M':   
             gender = True
         else:
             gender = False
-        rand = id_generator()
+        rand = cookie_to_rand(request.COOKIES.get('id'))
         data = {'fname' : fname.title(), 'lname' : lname.title(),  'ph_no' : mobnum, 'email' : email, 'passwd' : passwd, 'address' : 'Please enter address of delivery', 'verify' : False, 'GenderIsMale' : gender, 'rand' : rand, 'TotalOrders' : 0}
-        k = registerform()
-        k = registerform(data)
-        k.save()
-        cookie_data = rand_to_cookie(rand)
-        a=info.objects.get(ph_no=mobnum)
-        response = render(request,'order.html', {'name':str(a.fname), 'address':str(a.address)})
-        response.set_cookie(key='id', value=cookie_data)
-        return response
-
+        if send_mail('Test','http://127.0.0.1:8000/verify/'+email+'/'+rand, 'orderlan.nitk@gmail.com',[email], fail_silently=False):
+            k = registerform()
+            k = registerform(data)
+            k.save()
+            return redirect("http://127.0.0.1:8000")
+        else:
+            return HttpResponse("something aweful happened. please re-register with same details")
 def register(request):
-    return render(request,'firstform.html')
-def login(request):
     cookie_value = request.COOKIES.get('id')
-    if cookie_value!= None :
+    if cookie_value == None:
+        response = render(request,'firstform.html')
+        cookie_data = rand_to_cookie(id_generator())
+        response.set_cookie(key='id', value=cookie_data, max_age=30000000)
+        return response
+    else:
         randkey = cookie_to_rand(cookie_value)
         if info.objects.filter(rand=randkey).exists():
             a=info.objects.get(rand=randkey)
-            return HttpResponse("hey " + a.fname)
+            if(a.verify == 1):
+                return render(request,'order.html', {'name':str(a.fname), 'address':str(a.address)})
+            else:
+                return render(request, 'verify.html')
         else:
-            cookie_value = rand_to_cookie(id_generator())
-            return redirect("http://127.0.0.1:8000")
+            response = render(request,'firstform.html')
+            cookie_data = rand_to_cookie(id_generator())
+            response.set_cookie(key='id', value=cookie_data, max_age=30000000)
+            return response
+#            return HttpResponse('hello')
+def verify(request,emailid,qid):
+    a = info.objects.get(email = emailid)
+    if a.rand == qid:
+        a.verify = 1
+        a.save()
+        return redirect("http://127.0.0.1:8000")
     else:
         return redirect("http://127.0.0.1:8000")
-        
+            
 def placeorder(request):
     cookie_value = request.COOKIES.get('id')
     randkey = cookie_to_rand(cookie_value)
@@ -103,17 +118,54 @@ def placeorder(request):
         quantity=' '
         count = 0
         for i in ordervalues:
-            if orders[count]:
+            if orders[count]!='0' and i!='0':
                 quantity = quantity+i+'x'+orders[count]+' + '
                 count = count + 1
         quantity = quantity[0:(len(quantity) - 3)]
+        if len(quantity)<3:
+            return HttpResponse('invalid order')
+        a.address=address
         a.TotalOrders += 1
         a.save()
         orderid = a.fname+str(a.TotalOrders)
         dateplaced = date.today()
-        data = {'orderid':orderid, 'custph':a.ph_no, 'metersquantity':quantity, 'status':'1', 'DatePlaced':dateplaced}
+        data = {'orderid':orderid, 'custph':a.ph_no, 'metersquantity':quantity, 'status':'1', 'DatePlaced':dateplaced, 'deliveryaddress':address}
         k = registerformorders(data)
         k.save()
         return HttpResponse('thank you'+a.fname+' for placing order '+quantity)
     else:
         return HttpResponse('wrong')
+
+def test(request):
+    send_mail('Test', 'test mail sent via django', 'orderlan.nitk@gmail.com',['parijat.rox@gmail.com'], fail_silently=False)
+    return HttpResponse('sent')
+
+def myorder(request):
+    cookie_value = request.COOKIES.get('id')
+    randkey = cookie_to_rand(cookie_value)
+    if info.objects.filter(rand=randkey).exists():
+        b=info.objects.get(rand=randkey)
+        a=orders.objects.filter(custph=b.ph_no)
+        return render(request,'myorders.html',{'orders':a})
+def loginsubmit(request):
+    ph_no = request.POST.get('mobnum')
+    passwd = request.POST.get('passwd')
+    cookie_data = request.COOKIES.get('id')
+    if info.objects.filter(ph_no = ph_no).exists():
+        a = info.objects.get(ph_no = ph_no)
+        if(a.passwd == passwd):
+            a.rand = cookie_to_rand(cookie_data)
+            a.save()
+            return redirect("http://127.0.0.1:8000")
+        else:
+            return HttpResponse("wrong password !!" + password)
+    else:
+        return HttpResponse("wrong ph. no")
+def logout(request):
+    cookie_data = request.COOKIES.get('id')
+    rand = cookie_to_rand(cookie_data)
+    if info.objects.filter(rand = rand).exists():
+        a = info.objects.get(rand = rand)
+        a.rand = id_generator()
+        a.save()
+        return redirect("http://127.0.0.1:8000")

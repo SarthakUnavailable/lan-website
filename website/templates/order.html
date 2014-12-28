@@ -18,10 +18,11 @@
     </textarea>
 	<br/>
     <input type="submit" value="Submit">
-  </form> 
+  </form>
+  <br><br><br><br><br><br><br>
+  <form action="/logout/" method="POST">
+  {% csrf_token %}
+  <input type="submit" value="LOGOUT">
+  </form>
  </body>
 </html>
-
-
-
-

@@ -5,20 +5,34 @@
 		</title>
 	</head>
 	<body>
+<div>enter login details:
+<form action="/loginsubmit/" method="POST">
+	{% csrf_token %}
+  	mob num: <input type="text" name="mobnum" max = "9999999999" min = "7000000000"><br>
+  	password: <input type="password" name="passwd"><br>
+  	<input type="submit" value="Submit">
+</form>
+</div>
+<br><br><br>
 
+<div>New User? sign Up !!!
 	<form action="/submit/" method="POST">
 	{% csrf_token %}
   	First Name: <input type="text" name="fname"><br>
   	Last Name: <input type="text" name="lname"><br>
     email id: <input type="text" name="email"><br>
-    mob num: <input type="text" name="mobnum"><br>
+    mob num: <input type="text" name="mobnum" max = "9999999999" min = "7000000000"><br>
     password: <input type="password" name="passwd"><br>
     <select name="gender">
      	<option value="M">Male</option>
 	 	<option value="F">Female</option>
-	</select>
+	</select><br><br>
+	Note : verify your email ID by clicking on the link that will be sent to you when you register in order to complete registration process.
+	<br><br>
   	<input type="submit" value="Submit">
+  	<br>
+  	
 </form> 
-
+</div>
 	</body>
 </html>

@@ -1,0 +1,41 @@
+<html>
+	<head>
+		<title>
+
+		</title>
+	</head>
+	<body>
+	<table border='1'>
+	<tr>
+	<td>Date</td>
+	<td>Order ID</td>
+	<td>Order Status</td>
+	<td>Delivery Address</td>
+
+	</tr>
+	<tr></tr><tr></tr><tr></tr><tr></tr><tr></tr>
+	{%for e in orders%}
+	<tr>
+	<td>{{e.DatePlaced}}</td>
+	<td>{{e.id}}</td>
+	{% if e.status == '1' %}
+    <td> Order placed. Under Process</td>
+    {% endif %}
+    {% if e.status == '2' %}
+    <td> Processed. Delivery Remaining</td>
+    {% endif %}
+    {% if e.status == '3' %}
+    <td> Delivered </td>
+    {% endif %}
+    {% if e.status == '4' %}
+    <td> Order completed successfully</td>
+    {% endif %}
+    {% if e.status == '5' %}
+    <td> Order Cancelled</td>
+    {% endif %}
+    <td> {{e.deliveryaddress}} </td>
+    </tr>
+    {%endfor%}
+    </table>
+	</body>
+</html>

@@ -1,0 +1,15 @@
+<html>
+	<head>
+		<title>
+
+		</title>
+	</head>
+	<body>
+		check your email ID for the verification link that has been sent
+		<br><br><br>
+<form action="/logout/" method="POST">
+  {% csrf_token %}
+  <input type="submit" value="LOGOUT">
+  </form>
+	</body>
+</html>
